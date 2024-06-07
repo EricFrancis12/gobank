@@ -8,7 +8,7 @@ import (
 )
 
 type Storage interface {
-	CreateAccount(*Account) error
+	CreateAccount(*CreateAccountRequest) (*Account, error)
 	DeleteAccount(int) error
 	UpdateAccount(*Account) error
 	GetAccounts() ([]*Account, error)
@@ -55,7 +55,8 @@ func (s *PostgresStore) createAccountTable() error {
 	return err
 }
 
-func (s *PostgresStore) CreateAccount(acc *Account) error {
+func (s *PostgresStore) CreateAccount(createAccountReq *CreateAccountRequest) (*Account, error) {
+	acc := NewAccount(createAccountReq.FirstName, createAccountReq.LastName)
 	query := `
 		insert into account
 		(first_name, last_name, number, balance, created_at)
@@ -71,10 +72,10 @@ func (s *PostgresStore) CreateAccount(acc *Account) error {
 		acc.CreatedAt,
 	)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return acc, nil
 }
 
 func (s *PostgresStore) UpdateAccount(*Account) error {
