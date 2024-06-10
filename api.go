@@ -27,6 +27,7 @@ func NewAPIServer(listenAddr string, store Storage) *APIServer {
 func (s *APIServer) Run() {
 	router := mux.NewRouter()
 
+	router.HandleFunc("/test", makeHTTPHandleFunc(s.handleTestEndpoint))
 	router.HandleFunc("/login", makeHTTPHandleFunc(s.handleLogin))
 	router.HandleFunc("/account", makeHTTPHandleFunc(s.handleAccount))
 	router.HandleFunc("/account/{id}", withJWTAuth(makeHTTPHandleFunc(s.handleGetAccountByID), s.store))
@@ -35,6 +36,10 @@ func (s *APIServer) Run() {
 	log.Println("JSON API Server running on port: ", s.listenAddr)
 
 	http.ListenAndServe(s.listenAddr, router)
+}
+
+func (s *APIServer) handleTestEndpoint(w http.ResponseWriter, r *http.Request) error {
+	return WriteJSON(w, http.StatusOK, "This is a test endpoint")
 }
 
 func (s *APIServer) handleLogin(w http.ResponseWriter, r *http.Request) error {
